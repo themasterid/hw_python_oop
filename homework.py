@@ -3,7 +3,9 @@ import datetime as dt
 
 class Record:
     """Класс запись занчений."""
-    def __init__(self, amount: int, comment: str, date: str = dt.datetime.now().date()):
+    data = dt.datetime.now().date()
+
+    def __init__(self, amount: int, comment: str, date: str = data):
         self.amount = amount
         self.comment = comment
         self.date = date
