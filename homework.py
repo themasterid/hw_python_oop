@@ -7,3 +7,6 @@ class Calculator:
 
 class Record:
     pass
+
+class no:
+    pass
