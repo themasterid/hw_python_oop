@@ -2,70 +2,79 @@ import datetime as dt
 
 
 class Record:
-    """Класс запись."""
-    date_format = '%d.%m.%Y'
+    """Класс запись занчений."""
     now = dt.datetime.now()
 
     def __init__(self, amount: int, comment: str, date: str = str(now.date())):
         self.amount = amount
         self.comment = comment
         self.date = date
-        self.records: list = list()
-
-    def add_record(self) -> list:
-        self.records.append([self.amount, self.comment, self.date])
-        return self.records
 
 
 class Calculator:
     """Базовый класс калькулятора колорий."""
-    def __init__(self, limit: int, records: list = []):
+    def __init__(self, limit):
         self.limit = limit
-        self.records = records
+        self.records: list = list()
 
 
 class CaloriesCalculator(Calculator):
     """Класс калькулятора колорий."""
     def __init__(self, limit):
-        super().__init__(limit)
+        self.limit = limit
 
-    def add_record(self):
-        pass
+    def add_record(self, obj):
+        return Record.add_record(obj)
 
     def get_today_stats(self):
         pass
 
     def get_calories_remained(self):
         if self.limit < 1000:
-            print(f'Сегодня можно съесть что-нибудь ещё, но с общей калорийностью не более {self.limit} кКал')
+            return ('''Сегодня можно съесть что-нибудь ещё, но с общей
+            калорийностью не более {0} кКал'''.format(self.limit))
         else:
-            print('Хватит есть!')
+            return 'Хватит есть!'
 
     def get_week_stats(self):
         pass
 
 
 class CashCalculator(Calculator):
-    """Класс калькулятора денег."""
+    """Класс калькулятора денег. 'rub', 'usd' или 'eur'"""
+    USD_RATE = 424.60
+    EURO_RATE = 500.90
+
     def __init__(self, limit):
-        super().__init__(limit)
+        self.limit = limit
+        self.records: list = list()
+        self.now = dt.datetime.now()
 
-
-    def add_record(self):
-        pass
+    def add_record(self, obj):
+        return self.records.append(obj)
 
     def get_today_stats(self):
-        pass
+        count_today = 0
+        for i in self.records:
+            if i.date == str(self.now.date()):
+                count_today += i.amount
+        return count_today
 
-    def get_today_cash_remained(currency):
-        print('На сегодня осталось 1 руб/USD/Euro')
-        print('Денег нет, держись')
-        print('Денег нет, держись: твой долг - N руб/USD/Euro')
+    def get_today_cash_remained(self, currency: str):
+        self.limittoday = self.limit
+        self.currency = currency
+
+        for i in self.records:
+            if i.date == str(self.now.date()):
+                self.limittoday -= i.amount
+
+        if self.limittoday > 0:
+            return f'На сегодня осталось {self.limittoday} {self.currency}'
+        elif self.limittoday == 0:
+            return 'Денег нет, держись'
+        else:
+            return 'Денег нет, держись: твой долг - {0} {1}'.format(
+                abs(self.limittoday), currency)
 
     def get_week_stats(self):
         pass
-
-
-cash_calculator = CashCalculator(1000)
-
-cash_calculator.add_record(Record(amount=145, comment='кофе'))
