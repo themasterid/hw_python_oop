@@ -48,12 +48,6 @@ class CaloriesCalculator(Calculator):
                 count_today += i.amount
         return count_today
 
-        #if self.limit < 1000:
-        #    return ('''Сегодня можно съесть что-нибудь ещё, но с общей
-        #    калорийностью не более {0} кКал'''.format(self.limit))
-        #else:
-        #    return 'Хватит есть!'
-
 
 class CashCalculator(Calculator):
     """Класс калькулятора денег. 'rub', 'usd' или 'eur'"""
@@ -79,22 +73,3 @@ class CashCalculator(Calculator):
         else:
             return 'Денег нет, держись: твой долг - {0} {1}'.format(
                 abs(self.limittoday), currency)
-
-
-# создадим калькулятор денег с дневным лимитом 1000
-cash_calculator = CaloriesCalculator(2500)
-
-# дата в параметрах не указана,
-# так что по умолчанию к записи
-# должна автоматически добавиться сегодняшняя дата
-cash_calculator.add_record(Record(amount=1000, comment='Тестовый коммент', date='01.09.2019'))
-# и к этой записи тоже дата должна добавиться автоматически
-cash_calculator.add_record(Record(amount=300, comment='Серёге за обед'))
-# а тут пользователь указал дату, сохраняем её
-cash_calculator.add_record(Record(amount=3000,
-                                  comment='бар в Танин др',
-                                  date='08.11.2019'))
-
-print(cash_calculator.get_calories_remained())
-# должно напечататься
-# На сегодня осталось 555 руб 
