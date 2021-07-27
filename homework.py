@@ -3,9 +3,9 @@ import datetime as dt
 
 class Record:
     """Класс запись занчений."""
-    data = dt.datetime.now().date()
+    data_t = dt.datetime.now().date()
 
-    def __init__(self, amount: int, comment: str, date: str = data):
+    def __init__(self, amount: int, comment: str, date=data_t):
         self.amount = amount
         self.comment = comment
         self.date = date
@@ -75,4 +75,3 @@ class CashCalculator(Calculator):
         else:
             return 'Денег нет, держись: твой долг - {0} {1}'.format(
                 abs(self.limittoday), currency)
- 
