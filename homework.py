@@ -73,3 +73,4 @@ class CashCalculator(Calculator):
         else:
             return 'Денег нет, держись: твой долг - {0} {1}'.format(
                 abs(self.limittoday), currency)
+ 
