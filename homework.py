@@ -4,8 +4,13 @@ from typing import Union
 
 class Record:
     """Класс запись занчений."""
+    def __init__(
+        self,
+        amount: int,
+        comment: str,
+        date: Union[str, None] = None
+    ):
 
-    def __init__(self, amount: int, comment: str, date: Union[str, None] = None):
         self.amount = amount
         self.comment = comment
         if date is None:
@@ -97,39 +102,3 @@ class CashCalculator(Calculator):
             return msg_no
         else:
             return f'{msg_no}: твой долг - {abs(round(cash_tt, 2))} {cash_s}'
-
-
-'''
-#calc = Calculator(1000)
-cal_calculator = CaloriesCalculator(1000)
-cash_calculator = CashCalculator(1000)
-
-# дата в параметрах не указана,
-# так что по умолчанию к записи
-# должна автоматически добавиться сегодняшняя дата
-cash_calculator.add_record(Record(amount=999, comment='кофе'))
-# и к этой записи тоже дата должна добавиться автоматически
-cash_calculator.add_record(Record(amount=2, comment='Серёге за обед'))
-# а тут пользователь указал дату, сохраняем её
-cash_calculator.add_record(Record(amount=1000,
-                                  comment='бар в Танин др',
-                                  date='08.11.2019'))
-
-cal_calculator.add_record(Record(
-    amount=500,
-    comment='бар в Танин др'))
-
-cal_calculator.add_record(Record(
-    amount=200,
-    comment='бар в Танин др'))
-
-cal_calculator.add_record(Record(
-    amount=210,
-    comment='бар в Танин др'))
-
-print(cash_calculator.get_today_cash_remained('rub'))
-print(cash_calculator.get_today_cash_remained('usd'))
-print(cash_calculator.get_today_cash_remained('eur'))
-print(cash_calculator.get_week_stats())
-print(cal_calculator.get_week_stats())
-'''
