@@ -1,15 +1,18 @@
-import datetime
-from typing import Any
+import datetime as dt
+from typing import Union
 
 
 class Record:
     """Класс запись занчений."""
 
-    def __init__(self, amount: int, comment: str, date: str=datetime.date.today()): #datetime.date.today()
+    def __init__(self, amount: int, comment: str, date: Union[str, None] = None):
         self.amount = amount
         self.comment = comment
+        if date == None:
+            date = dt.datetime.now().date()
+        else:
+            date = dt.datetime.strptime(date, '%d.%m.%Y').date()
         self.date = date
-        self.records: list = list()
 
     def add_record(self, obj):
         self.obj = obj
@@ -29,71 +32,64 @@ class Calculator:
     def get_today_stats(self):
         count_today = 0
         for i in self.records:
-            if i.date == datetime.date.today():
+            if i.date == dt.date.today():
                 count_today += i.amount
-        print(count_today)
+        return count_today
 
     def get_week_stats(self):
-        return '2000'
+        return 0
 
 
 class CaloriesCalculator(Calculator):
     """Класс калькулятора колорий."""
     def __init__(self, limit):
+        super().__init__(limit)
         self.limit = limit
-        self.records: list = list()
 
     def get_calories_remained(self):
         count_today = 0
         for i in self.records:
-            if i.date == datetime.date.today():
+            if i.date == dt.date.today():
                 count_today += i.amount
-        return count_today
+        msg_go_eat: str = (
+            f'Сегодня можно съесть что-нибудь ещё, '
+            f'но с общей калорийностью не более'
+            f' {self.limit - count_today} кКал')
+        msg_stop_eat: str = 'Хватит есть!'
+        return msg_go_eat if count_today < self.limit else msg_stop_eat
 
 
 class CashCalculator(Calculator):
-    """Класс калькулятора денег. 'rub', 'usd' или 'eur'."""
-    USD_RATE = 424.60
-    EURO_RATE = 500.90
+    """Класс калькулятора денег."""
+    USD_RATE = 60.0
+    EURO_RATE = 70.0
 
     def __init__(self, limit):
+        super().__init__(limit)
         self.limit = limit
-        self.records: list = list()
 
     def get_today_cash_remained(self, currency: str):
-        cash_t = {"usd": 73.75, "rub": 1, "eur": 87.25}
-        self.limittoday = self.limit
+        limittoday = self.limit
         self.currency = currency
+        msg_no = 'Денег нет, держись'
 
         for i in self.records:
-            if i.date == datetime.date.today():
-                self.limittoday -= i.amount
+            if i.date == dt.date.today():
+                limittoday -= i.amount
 
-        if self.limittoday > 0:
-            return 'На сегодня осталось {} {}'.format(
-                round(self.limittoday / cash_t[currency] * cash_t['rub'], 2),
-                self.currency)
-        elif self.limittoday == 0:
-            return 'Денег нет, держись'
+        if self.currency == 'rub':
+            currency = 'руб'
+            cash_tt = limittoday
+        elif self.currency == 'usd':
+            currency = 'USD'
+            cash_tt = limittoday / self.USD_RATE
+        elif self.currency == 'eur':
+            currency = 'Euro'
+            cash_tt = limittoday / self.EURO_RATE
+
+        if limittoday > 0:
+            return f'На сегодня осталось {round(abs(cash_tt), 2)} {currency}'
+        elif limittoday == 0:
+            return msg_no
         else:
-            return 'Денег нет, держись: твой долг - {0} {1}'.format(
-                round((self.limittoday / cash_t[currency]) * cash_t['rub'], 2),
-                self.currency)
-
-
-# создадим калькулятор денег с дневным лимитом 1000
-cash_calculator = CashCalculator(2500)
-
-# дата в параметрах не указана,
-# так что по умолчанию к записи
-# должна автоматически добавиться сегодняшняя дата
-cash_calculator.add_record(Record(amount=1000, comment='Тестовый коммент'))
-# и к этой записи тоже дата должна добавиться автоматически
-# а тут пользователь указал дату, сохраняем её
-cash_calculator.add_record(Record(amount=1000,
-                                  comment='Тестовый коммент',
-                                  date='01.09.201'))
-
-print(cash_calculator.get_today_cash_remained('eur'))
-# должно напечататься
-# На сегодня осталось 555 руб 
+            return f'{msg_no}: твой долг {round(abs(cash_tt), 2)} {currency}'
