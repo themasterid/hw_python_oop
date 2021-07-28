@@ -11,12 +11,12 @@ class Record:
         if date == None:
             date = dt.datetime.now().date()
         else:
-            date = dt.datetime.strptime(date, '%d.%m.%Y').date()
+            date = dt.datetime.strptime(str(date), '%d.%m.%Y').date()
         self.date = date
 
     def add_record(self, obj):
         self.obj = obj
-        self.records.append(self.obj)
+        return self.records.append(self.obj)
 
 
 class Calculator:
@@ -37,7 +37,11 @@ class Calculator:
         return count_today
 
     def get_week_stats(self):
-        return 0
+        count_today = 0
+        for i in self.records:
+            if i.date == dt.date.today():
+                count_today += i.amount
+        return count_today
 
 
 class CaloriesCalculator(Calculator):
@@ -78,18 +82,54 @@ class CashCalculator(Calculator):
                 limittoday -= i.amount
 
         if self.currency == 'rub':
-            currency = 'руб'
+            cash_s = 'руб'
             cash_tt = limittoday
         elif self.currency == 'usd':
-            currency = 'USD'
+            cash_s = 'USD'
             cash_tt = limittoday / self.USD_RATE
         elif self.currency == 'eur':
-            currency = 'Euro'
+            cash_s = 'Euro'
             cash_tt = limittoday / self.EURO_RATE
 
         if limittoday > 0:
-            return f'На сегодня осталось {round(abs(cash_tt), 2)} {currency}'
+            return f'На сегодня осталось {round(cash_tt, 2)} {cash_s}'
         elif limittoday == 0:
             return msg_no
         else:
-            return f'{msg_no}: твой долг {round(abs(cash_tt), 2)} {currency}'
+            return f'{msg_no}: твой долг - {abs(round(cash_tt, 2))} {cash_s}'
+
+
+'''
+#calc = Calculator(1000)
+cal_calculator = CaloriesCalculator(1000)
+cash_calculator = CashCalculator(1000)
+
+# дата в параметрах не указана,
+# так что по умолчанию к записи
+# должна автоматически добавиться сегодняшняя дата
+cash_calculator.add_record(Record(amount=999, comment='кофе'))
+# и к этой записи тоже дата должна добавиться автоматически
+cash_calculator.add_record(Record(amount=2, comment='Серёге за обед'))
+# а тут пользователь указал дату, сохраняем её
+cash_calculator.add_record(Record(amount=1000,
+                                  comment='бар в Танин др',
+                                  date='08.11.2019'))
+
+cal_calculator.add_record(Record(
+    amount=500,
+    comment='бар в Танин др'))
+
+cal_calculator.add_record(Record(
+    amount=200,
+    comment='бар в Танин др'))
+
+cal_calculator.add_record(Record(
+    amount=210,
+    comment='бар в Танин др'))
+
+print(cash_calculator.get_today_cash_remained('rub'))
+print(cash_calculator.get_today_cash_remained('usd'))
+print(cash_calculator.get_today_cash_remained('eur'))
+print(cash_calculator.get_week_stats())
+print(cal_calculator.get_week_stats())
+'''
