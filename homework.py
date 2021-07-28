@@ -5,10 +5,10 @@ from typing import Union
 class Record:
     """Класс запись занчений."""
 
-    def __init__(self, amount: int, comment: str, date: Union[str, None] = None):
-        self.amount = amount
+    def __init__(self, amt: int, comment: str, date: Union[str, None] = None):
+        self.amount = amt
         self.comment = comment
-        if date == None:
+        if date is None:
             date = dt.datetime.now().date()
         else:
             date = dt.datetime.strptime(str(date), '%d.%m.%Y').date()
