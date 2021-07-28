@@ -5,8 +5,8 @@ from typing import Union
 class Record:
     """Класс запись занчений."""
 
-    def __init__(self, amt: int, comment: str, date: Union[str, None] = None):
-        self.amount = amt
+    def __init__(self, amount: int, comment: str, date: Union[str, None] = None):
+        self.amount = amount
         self.comment = comment
         if date is None:
             date = dt.datetime.now().date()
