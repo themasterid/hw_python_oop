@@ -3,20 +3,21 @@ from typing import Union
 
 
 class Record:
-    """Класс запись занчений."""
+    """Класс для хранения значений."""
+
     def __init__(
         self,
         amount: int,
         comment: str,
         date: Union[str, None] = None
     ):
-
-        self.amount = amount
-        self.comment = comment
         if date is None:
             date = dt.datetime.now().date()
         else:
             date = dt.datetime.strptime(str(date), '%d.%m.%Y').date()
+
+        self.amount = amount
+        self.comment = comment
         self.date = date
 
     def add_record(self, obj):
@@ -25,7 +26,8 @@ class Record:
 
 
 class Calculator:
-    """Базовый класс калькулятора колорий."""
+    """Базовый класс калькулятора калорий."""
+
     def __init__(self, limit):
         self.limit = limit
         self.records: list = list()
@@ -42,21 +44,26 @@ class Calculator:
         return count_today
 
     def get_week_stats(self):
-        count_today = 0
-        for i in self.records:
-            if i.date == dt.date.today():
-                count_today += i.amount
-        return count_today
+        date_format = "%Y-%m-%d"
+        base_date = str(dt.datetime.now().date())
+        base = dt.datetime.strptime(base_date, date_format)
+        amount_l = [
+            i.amount for i in self.records
+            if (base - dt.datetime.strptime(str(i.date), date_format))
+            .days in [0, 1, 2, 3, 4, 5, 6]]
+        return sum(amount_l)
 
 
 class CaloriesCalculator(Calculator):
-    """Класс калькулятора колорий."""
+    """Дочерний класс калькулятора калорий."""
+
     def __init__(self, limit):
         super().__init__(limit)
         self.limit = limit
 
     def get_calories_remained(self):
         count_today = 0
+        msg_stop_eat: str = 'Хватит есть!'
         for i in self.records:
             if i.date == dt.date.today():
                 count_today += i.amount
@@ -64,12 +71,12 @@ class CaloriesCalculator(Calculator):
             f'Сегодня можно съесть что-нибудь ещё, '
             f'но с общей калорийностью не более'
             f' {self.limit - count_today} кКал')
-        msg_stop_eat: str = 'Хватит есть!'
         return msg_go_eat if count_today < self.limit else msg_stop_eat
 
 
 class CashCalculator(Calculator):
-    """Класс калькулятора денег."""
+    """Дочерний класс калькулятора денег."""
+
     USD_RATE = 60.0
     EURO_RATE = 70.0
 
@@ -80,7 +87,6 @@ class CashCalculator(Calculator):
     def get_today_cash_remained(self, currency: str):
         limittoday = self.limit
         self.currency = currency
-        msg_no = 'Денег нет, держись'
 
         for i in self.records:
             if i.date == dt.date.today():
@@ -95,6 +101,8 @@ class CashCalculator(Calculator):
         elif self.currency == 'eur':
             cash_s = 'Euro'
             cash_tt = limittoday / self.EURO_RATE
+
+        msg_no = 'Денег нет, держись'
 
         if limittoday > 0:
             return f'На сегодня осталось {round(cash_tt, 2)} {cash_s}'
