@@ -1,60 +1,62 @@
 import datetime as dt
-from typing import Union
+from typing import Optional, Union
 
 
 class Record:
     """Класс для хранения значений."""
 
+    DATE_FMT = '%d.%m.%Y'
+
     def __init__(
         self,
         amount: int,
         comment: str,
-        date: Union[str, None] = None
+        date: Optional[str] = None
     ) -> None:
-        self.amount: int = amount
-        self.comment: str = comment
-        self.date: dt.date = dt.datetime.now().date()
+        self.amount = amount
+        self.comment = comment
         if date is not None:
-            self.date = dt.datetime.strptime(str(date), '%d.%m.%Y').date()
+            self.date = dt.datetime.strptime(date, self.DATE_FMT).date()
+        else:
+            self.date = dt.datetime.now().date()
 
 
 class Calculator:
     """Базовый класс калькулятора калорий и денег."""
 
     def __init__(self, limit: Union[float, int]):
-        self.limit: Union[float, int] = limit
-        self.records: list = list()
-        self.today_d = dt.date.today()
+        self.limit = limit
+        self.records: list = []
 
-    def add_record(self, obj: object):
+    def add_record(self, obj: Record):
         return self.records.append(obj)
 
     def get_today_stats(self):
-        return sum([
+        return sum(
             day.amount for day in self.records
-            if day.date == self.today_d])
+            if day.date == dt.date.today())
 
     def get_week_stats(self):
-        offset_week = self.today_d - dt.timedelta(days=7)
-        return sum([
+        offset_week = dt.date.today() - dt.timedelta(weeks=1)
+        return sum(
             day.amount for day in self.records
-            if offset_week <= day.date <= self.today_d])
+            if offset_week <= day.date <= dt.date.today())
+
+    def limit_today(self):
+        return self.limit - self.get_today_stats()
 
 
 class CaloriesCalculator(Calculator):
     """Дочерний класс калькулятора калорий."""
 
-    def __init__(self, limit):
-        super().__init__(limit)
-
     def get_calories_remained(self) -> str:
-        calories_today: Union[float, int] = self.get_today_stats()
-        msg_stop_eat: str = 'Хватит есть!'
-        msg_go_eat: str = (
-            f'Сегодня можно съесть что-нибудь ещё, '
-            f'но с общей калорийностью не более'
-            f' {self.limit - calories_today} кКал')
-        return msg_go_eat if calories_today < self.limit else msg_stop_eat
+        self.limit_today()
+        if self.get_today_stats() < self.limit:
+            return ('Сегодня можно съесть что-нибудь ещё, '
+                    'но с общей калорийностью не более'
+                    f' {self.limit_today()} кКал')
+        else:
+            return 'Хватит есть!'
 
 
 class CashCalculator(Calculator):
@@ -63,37 +65,25 @@ class CashCalculator(Calculator):
     USD_RATE = 60.0
     EURO_RATE = 70.0
 
-    def __init__(self, limit: Union[float, int]):
-        super().__init__(limit)
-
     def get_today_cash_remained(self, currency: str) -> str:
-        limittoday: Union[float, int] = self.limit - self.get_today_stats()
-        self.currency: str = currency
-        msg_no_money: str = 'Денег нет, держись'
+        money: dict = {'rub': 'руб', 'usd': 'USD', 'eur': 'Euro'}
 
-        money: dict = {
-            'rub': 'руб',
-            'usd': 'USD',
-            'eur': 'Euro'
-        }
-
-        try:
-            money[self.currency]
-        except KeyError:
+        if currency not in money:
             return '<выбрана неверная валюта>'
 
-        if money[self.currency] == 'руб':
-            cash_tday = limittoday
-        elif money[self.currency] == 'USD':
-            cash_tday = limittoday / self.USD_RATE
+        if self.limit_today() == 0:
+            return 'Денег нет, держись'
         else:
-            cash_tday = limittoday / self.EURO_RATE
+            if money[currency] == 'руб':
+                cash_tday = abs(round(self.limit_today(), 2))
+            elif money[currency] == 'USD':
+                cash_tday = abs(round(self.limit_today() / self.USD_RATE, 2))
+            else:
+                cash_tday = abs(round(self.limit_today() / self.EURO_RATE, 2))
 
-        if limittoday > 0:
-            return (f'На сегодня осталось '
-                    f'{round(cash_tday, 2)} {money[self.currency]}')
-        elif limittoday < 0:
-            return (f'{msg_no_money}: твой долг - '
-                    f'{abs(round(cash_tday, 2))} {money[self.currency]}')
-        else:
-            return msg_no_money
+            if self.limit_today() > 0:
+                return ('На сегодня осталось '
+                        f'{cash_tday} {money[currency]}')
+            else:
+                return ('Денег нет, держись: твой долг - '
+                        f'{cash_tday} {money[currency]}')
