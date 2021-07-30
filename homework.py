@@ -28,28 +28,28 @@ class Calculator:
         self.limit = limit
         self.records: list = []
 
-    def add_record(self, obj: Record):
+    def add_record(self, obj: Record) -> list:
         return self.records.append(obj)
 
-    def get_today_stats(self):
+    def get_today_stats(self) -> Union[int, float]:
         return sum(
             day.amount for day in self.records
             if day.date == dt.date.today())
 
-    def get_week_stats(self):
-        offset_week = dt.date.today() - dt.timedelta(weeks=1)
+    def get_week_stats(self) -> Union[int, float]:
+        offset_week: dt.date = dt.date.today() - dt.timedelta(days=7)
         return sum(
             day.amount for day in self.records
             if offset_week <= day.date <= dt.date.today())
 
-    def limit_today(self):
+    def limit_today(self) -> Union[int, float]:
         return self.limit - self.get_today_stats()
 
 
 class CaloriesCalculator(Calculator):
     """Дочерний класс калькулятора калорий."""
 
-    def get_calories_remained(self) -> str:        
+    def get_calories_remained(self) -> str:
         if self.get_today_stats() < self.limit:
             return ('Сегодня можно съесть что-нибудь ещё, '
                     'но с общей калорийностью не более'
@@ -61,8 +61,8 @@ class CaloriesCalculator(Calculator):
 class CashCalculator(Calculator):
     """Дочерний класс калькулятора денег."""
 
-    USD_RATE = 60.0
-    EURO_RATE = 70.0
+    USD_RATE: float = 60.0
+    EURO_RATE: float = 70.0
 
     def get_today_cash_remained(self, currency: str) -> str:
         money: dict = {'rub': 'руб', 'usd': 'USD', 'eur': 'Euro'}
