@@ -49,8 +49,7 @@ class Calculator:
 class CaloriesCalculator(Calculator):
     """Дочерний класс калькулятора калорий."""
 
-    def get_calories_remained(self) -> str:
-        self.limit_today()
+    def get_calories_remained(self) -> str:        
         if self.get_today_stats() < self.limit:
             return ('Сегодня можно съесть что-нибудь ещё, '
                     'но с общей калорийностью не более'
