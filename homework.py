@@ -5,7 +5,7 @@ from typing import Optional, Union
 class Record:
     """Класс для хранения значений."""
 
-    DATE_FMT = '%d.%m.%Y'
+    DATE_FMT: str = '%d.%m.%Y'
 
     def __init__(
         self,
