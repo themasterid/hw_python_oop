@@ -90,7 +90,7 @@ class CashCalculator(Calculator):
         return ('Денег нет, держись: твой долг - '
                 f'{cash_tday[0]} {cash_tday[1]}')
 
-    def get_cash_remained(self, currency) -> Union[int, float]:
+    def get_cash_remained(self, currency) -> set:
         return (abs(round(
             self.get_limit_today() / self.money[currency][0],
             self.CALC_ACCURACY)), self.money[currency][1])
