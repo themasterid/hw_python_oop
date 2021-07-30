@@ -75,15 +75,16 @@ class CashCalculator(Calculator):
     }
 
     def get_today_cash_remained(self, currency: str) -> str:
+        limit_today = self.get_limit_today()
         if currency not in self.money:
             return '<выбрана неверная валюта>'
 
-        if self.get_limit_today() == 0:
+        if limit_today == 0:
             return 'Денег нет, держись'
 
         cash_tday = self.get_cash_remained(currency)
 
-        if self.get_limit_today() > 0:
+        if limit_today > 0:
             return ('На сегодня осталось '
                     f'{cash_tday[0]} {cash_tday[1]}')
         return ('Денег нет, держись: твой долг - '
