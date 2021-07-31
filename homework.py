@@ -85,7 +85,7 @@ class CashCalculator(Calculator):
             return 'Денег нет, держись'
 
         cash_tday = round(
-            abs(limit_today / money[currency][0]),
+            abs(limit_today) / money[currency][0],
             self.CALC_ACCURACY)
 
         resault = f'{cash_tday} {money[currency][1]}'
