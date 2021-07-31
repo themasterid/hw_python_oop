@@ -54,9 +54,8 @@ class CaloriesCalculator(Calculator):
     def get_calories_remained(self) -> str:
         limit_today = self.get_limit_today()
         if limit_today > 0:
-            return ('Сегодня можно съесть что-нибудь ещё, '
-                    'но с общей калорийностью не более'
-                    f' {limit_today} кКал')
+            return ('Сегодня можно съесть что-нибудь ещё, но с общей '
+                    f'калорийностью не более {limit_today} кКал')
         return 'Хватит есть!'
 
 
@@ -84,12 +83,11 @@ class CashCalculator(Calculator):
         if limit_today == 0:
             return 'Денег нет, держись'
 
+        rate_m, name_money = money[currency]
         cash_tday = round(
-            abs(limit_today) / money[currency][0],
+            abs(limit_today) / rate_m,
             self.CALC_ACCURACY)
 
-        resault = f'{cash_tday} {money[currency][1]}'
-
         if limit_today > 0:
-            return f'На сегодня осталось {resault}'
-        return f'Денег нет, держись: твой долг - {resault}'
+            return f'На сегодня осталось {cash_tday} {name_money}'
+        return f'Денег нет, держись: твой долг - {cash_tday} {name_money}'
