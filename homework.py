@@ -88,7 +88,7 @@ class CashCalculator(Calculator):
             abs(limit_today / money[currency][0]),
             self.CALC_ACCURACY)
 
-        resault = f"{cash_tday} {money[currency][1]}"
+        resault = f'{cash_tday} {money[currency][1]}'
 
         if limit_today > 0:
             return f'На сегодня осталось {resault}'
