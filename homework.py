@@ -53,7 +53,7 @@ class CaloriesCalculator(Calculator):
 
     def get_calories_remained(self) -> str:
         limit_today = self.get_limit_today()
-        if 0 < limit_today < self.limit:
+        if limit_today > 0:
             return ('Сегодня можно съесть что-нибудь ещё, '
                     'но с общей калорийностью не более'
                     f' {limit_today} кКал')
@@ -63,34 +63,33 @@ class CaloriesCalculator(Calculator):
 class CashCalculator(Calculator):
     """Дочерний класс калькулятора денег."""
 
-    USD_RATE: float = 60.0
-    EURO_RATE: float = 70.0
+    USD_RATE: float = 72.0
+    EURO_RATE: float = 86.0
     RUB_RATE: float = 1.0
     CALC_ACCURACY: int = 2
 
-    money: dict = {
-        'rub': (RUB_RATE, 'руб'),
-        'usd': (USD_RATE, 'USD'),
-        'eur': (EURO_RATE, 'Euro')
-    }
-
     def get_today_cash_remained(self, currency: str) -> str:
-        limit_today = self.get_limit_today()
-        if currency not in self.money:
+
+        money: dict = {
+            'rub': (self.RUB_RATE, 'руб'),
+            'usd': (self.USD_RATE, 'USD'),
+            'eur': (self.EURO_RATE, 'Euro')
+        }
+
+        if currency not in money:
             return '<выбрана неверная валюта>'
+
+        limit_today = self.get_limit_today()
 
         if limit_today == 0:
             return 'Денег нет, держись'
 
-        cash_tday = self.get_cash_remained(currency)
+        cash_tday = round(
+            abs(self.get_limit_today() / money[currency][0]),
+            self.CALC_ACCURACY)
+
+        resault = f"{cash_tday} {money[currency][1]}"
 
         if limit_today > 0:
-            return ('На сегодня осталось '
-                    f'{cash_tday[0]} {cash_tday[1]}')
-        return ('Денег нет, держись: твой долг - '
-                f'{cash_tday[0]} {cash_tday[1]}')
-
-    def get_cash_remained(self, currency) -> set:
-        return (abs(round(
-            self.get_limit_today() / self.money[currency][0],
-            self.CALC_ACCURACY)), self.money[currency][1])
+            return f'На сегодня осталось {resault}'
+        return f'Денег нет, держись: твой долг - {resault}'
