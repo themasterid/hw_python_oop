@@ -28,21 +28,21 @@ class Calculator:
         self.limit = limit
         self.records: list = []
 
-    def add_record(self, obj: Record) -> list:
-        return self.records.append(obj)
+    def add_record(self, record: Record) -> list:
+        return self.records.append(record)
 
     def get_today_stats(self) -> Union[int, float]:
-        self.today = dt.date.today()
+        today = dt.date.today()
         return sum(
             day.amount for day in self.records
-            if day.date == self.today)
+            if day.date == today)
 
     def get_week_stats(self) -> Union[int, float]:
-        self.today = dt.date.today()
-        offset_week: dt.date = self.today - dt.timedelta(days=7)
+        today = dt.date.today()
+        offset_week = today - dt.timedelta(days=7)
         return sum(
             day.amount for day in self.records
-            if offset_week <= day.date <= self.today)
+            if offset_week <= day.date <= today)
 
     def get_limit_today(self) -> Union[int, float]:
         return self.limit - self.get_today_stats()
