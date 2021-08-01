@@ -28,7 +28,7 @@ class Calculator:
         self.limit = limit
         self.records: list = []
 
-    def add_record(self, record: Record) -> list:
+    def add_record(self, record: Record):
         return self.records.append(record)
 
     def get_today_stats(self) -> Union[int, float]:
@@ -85,8 +85,8 @@ class CashCalculator(Calculator):
 
         rate_m, name_money = money[currency]
 
-        cash_tday = round(abs(limit_today) / rate_m, self.CALC_ACCURACY)
+        cash_today = round(abs(limit_today) / rate_m, self.CALC_ACCURACY)
 
         if limit_today > 0:
-            return f'На сегодня осталось {cash_tday} {name_money}'
-        return f'Денег нет, держись: твой долг - {cash_tday} {name_money}'
+            return f'На сегодня осталось {cash_today} {name_money}'
+        return f'Денег нет, держись: твой долг - {cash_today} {name_money}'
