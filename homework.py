@@ -28,8 +28,8 @@ class Calculator:
         self.limit = limit
         self.records: list = []
 
-    def add_record(self, record: Record):
-        return self.records.append(record)
+    def add_record(self, record: Record) -> None:
+        self.records.append(record)
 
     def get_today_stats(self) -> Union[int, float]:
         today = dt.date.today()
