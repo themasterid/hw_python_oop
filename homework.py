@@ -22,7 +22,7 @@ class Record:
 
 
 class Calculator:
-    """Базовый класс калькулятора калорий и денег."""
+    """"Базовый класс калькулятора калорий и денег."""
 
     def __init__(self, limit: Union[float, int]):
         self.limit = limit
