@@ -15,10 +15,10 @@ class Record:
     ) -> None:
         self.amount = amount
         self.comment = comment
-        if date is not None:
-            self.date = dt.datetime.strptime(date, DATE_FMT).date()
-        else:
-            self.date = dt.datetime.now().date()
+        self.date = (
+            dt.datetime.strptime(date, DATE_FMT).date()
+            if date
+            else dt.datetime.now().date())
 
 
 class Calculator:

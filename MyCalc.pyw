@@ -7,7 +7,7 @@ from PyQt5 import QtWidgets
 from mainwindows import Ui_CalcWin
 
 DATE_FMT: str = '%d.%m.%Y'
-MONEY: dict = {'rub': 'руб', 'usd': 'USD', 'eur': 'Euro'}
+MONEY: dict = {'rub': 'руб/кКал', 'usd': 'USD/кКал', 'eur': 'Euro/кКал'}
 USD_RATE: float = 72.0
 EURO_RATE: float = 86.0
 RUB_RATE: float = 1.0
@@ -24,10 +24,10 @@ class Record:
     ) -> None:
         self.amount = amount
         self.comment = comment
-        if date is not None:
-            self.date = dt.datetime.strptime(date, DATE_FMT).date()
-        else:
-            self.date = dt.datetime.now().date()
+        self.date = (
+            dt.datetime.strptime(date, DATE_FMT).date()
+            if date
+            else dt.datetime.now().date())
 
 
 class Calculator(QtWidgets.QMainWindow):
@@ -61,25 +61,37 @@ class Calculator(QtWidgets.QMainWindow):
         self.statusBar().showMessage(
             f'Добавлено записей - {str(len(self.records))}')
 
+    def get_valid_money(self) -> bool:
+        curency = self.ui.curency_e.text()
+        if curency not in MONEY:
+            self.ui.resoult_txt.setText(
+                '<выбрана неверная валюта>')
+            return False
+        return True
+
     def get_today_stats(self) -> Union[int, float]:
         curency = self.ui.curency_e.text()
+        if not self.get_valid_money():
+            return 0
         today = dt.date.today()
         out = sum(
             day.amount for day in self.records
             if day.date == today)
         self.ui.resoult_txt.setText(
-            f'Расход в день - {out} {MONEY[curency]}/кКал')
+            f'Расход в день - {out} {MONEY[curency]}')
         return out
 
     def get_week_stats(self) -> Union[int, float]:
+        curency = self.ui.curency_e.text()
+        if not self.get_valid_money():
+            return 0
         today = dt.date.today()
         offset_week = today - dt.timedelta(days=7)
-        curency = self.ui.curency_e.text()
         out = sum(
             day.amount for day in self.records
             if offset_week <= day.date <= today)
         self.ui.resoult_txt.setText(
-            f'Расход в неделю - {out} {MONEY[curency]}/кКал')
+            f'Расход в неделю - {out} {MONEY[curency]}')
         return out
 
     def get_limit_today(self) -> Union[int, float]:
