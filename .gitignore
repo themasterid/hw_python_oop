@@ -1,7 +1,9 @@
 # Byte-compiled / optimized / DLL files
+*.bat
 __pycache__/
 *.py[cod]
 *$py.class
+mainwindows.py
 
 # C extensions
 *.so
