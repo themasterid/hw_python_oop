@@ -1,16 +1,26 @@
 import datetime as dt
+import json
 import sys
 from typing import Optional, Union
 
+import requests
+from bs4 import BeautifulSoup
+
+from PyQt5.QtWidgets import QTableWidgetItem
+
+from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 
 from mainwindows import Ui_CalcWin
 
 DATE_FMT: str = '%d.%m.%Y'
-MONEY: dict = {'rub': 'руб/кКал', 'usd': 'USD/кКал', 'eur': 'Euro/кКал'}
-USD_RATE: float = 72.0
-EURO_RATE: float = 86.0
-RUB_RATE: float = 1.0
+TODAY = dt.date.today().strftime(DATE_FMT)
+MONEY: dict = {
+    'RUR': 'руб/кКал',
+    'USD': 'USD/кКал',
+    'EUR': 'Euro/кКал',
+    'KZT': 'тенге/кКал'}
+MONEY1: dict = {'RUR': 'руб', 'USD': 'USD', 'EUR': 'Euro', 'KZT': 'тенге'}
 
 
 class Record:
@@ -61,18 +71,35 @@ class Calculator(QtWidgets.QMainWindow):
         self.statusBar().showMessage(
             f'Добавлено записей - {str(len(self.records))}')
 
-    def get_valid_money(self) -> bool:
-        curency = self.ui.curency_e.text()
-        if curency not in MONEY:
-            self.ui.resoult_txt.setText(
-                '<выбрана неверная валюта>')
-            return False
-        return True
+        self.ui.resoult_t.setColumnCount(3)
+        self.ui.resoult_t.setRowCount(len(self.records))
+        self.ui.resoult_t.setSortingEnabled(True)
+
+        rows_list = []
+        for _ in range(len(self.records)):
+            rows_list.append(str(_ + 1))
+        self.ui.resoult_t.setVerticalHeaderLabels(rows_list)
+
+        row = 0
+        for tup in self.records:
+            col = 0
+            for item in [
+                str(tup.amount),
+                tup.comment,
+                tup.date.strftime(DATE_FMT)
+            ]:
+                cellinfo = QTableWidgetItem(item)
+                cellinfo.setFlags(
+                    QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+                self.ui.resoult_t.setItem(row, col, cellinfo)
+                col += 1
+            row += 1
+
+        self.ui.resoult_t.setGridStyle(1)
+        # self.ui.resoult_t.resizeColumnsToContents()
 
     def get_today_stats(self) -> Union[int, float]:
-        curency = self.ui.curency_e.text()
-        if not self.get_valid_money():
-            return 0
+        curency = self.ui.curency_e.currentText()
         today = dt.date.today()
         out = sum(
             day.amount for day in self.records
@@ -82,9 +109,7 @@ class Calculator(QtWidgets.QMainWindow):
         return out
 
     def get_week_stats(self) -> Union[int, float]:
-        curency = self.ui.curency_e.text()
-        if not self.get_valid_money():
-            return 0
+        curency = self.ui.curency_e.currentText()
         today = dt.date.today()
         offset_week = today - dt.timedelta(days=7)
         out = sum(
@@ -96,6 +121,36 @@ class Calculator(QtWidgets.QMainWindow):
 
     def get_limit_today(self) -> Union[int, float]:
         return self.limit - self.get_today_stats()
+
+    def get_rates(self, cur_from, dates, requests):
+        fname = f'currency_{TODAY}.json'
+        if cur_from == 'RUR':
+            return {'RUR': 1.0}
+
+        if self.open_file(fname):
+            return self.open_file(fname)
+
+        result = requests.get(
+            "https://www.cbr.ru/scripts/XML_daily.asp",
+            {"date_req": dates})
+        soup = BeautifulSoup(result.content, 'xml')
+        rates = {i.CharCode.string: (
+            float(i.Value.string.replace(',', '.'))
+        ) for i in soup('Valute')
+        }
+        self.write_file(rates, fname)
+        return self.open_file(fname)
+
+    def write_file(self, r, fname):
+        with open(fname, 'w', encoding='utf-8') as f:
+            return json.dump(r, f, ensure_ascii=False, indent=4)
+
+    def open_file(self, fname):
+        try:
+            with open(fname, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except FileNotFoundError:
+            return False
 
 
 class CaloriesCalculator(Calculator):
@@ -114,29 +169,21 @@ class CashCalculator(Calculator):
     """Дочерний класс калькулятора денег."""
 
     def get_today_cash_remained(self):
-        money: dict = {
-            'rub': (RUB_RATE, 'руб'),
-            'usd': (USD_RATE, 'USD'),
-            'eur': (EURO_RATE, 'Euro')
-        }
-        currency = self.ui.curency_e.text()
-        if currency not in money:
-            return self.ui.resoult_txt.setText('<выбрана неверная валюта>')
-
         limit_today = self.get_limit_today()
 
         if limit_today == 0:
             return self.ui.resoult_txt.setText('Денег нет, держись')
 
-        rate_m, name_money = money[currency]
-
-        cash_today = round(abs(limit_today) / rate_m, 2)
+        today = dt.date.today().strftime("%d.%m.%Y")
+        curency = self.ui.curency_e.currentText()
+        rate_m = self.get_rates(curency, today, requests)
+        cash_today = round(abs(limit_today) / rate_m[curency], 2)
 
         if limit_today > 0:
             return self.ui.resoult_txt.setText(
-                f'На сегодня осталось {cash_today} {name_money}')
+                f'На сегодня осталось {cash_today} {MONEY1[curency]}')
         return self.ui.resoult_txt.setText(
-            f'Денег нет, держись: твой долг - {cash_today} {name_money}')
+            f'Денег нет, держись: твой долг - {cash_today} {MONEY1[curency]}')
 
 
 if __name__ == '__main__':
