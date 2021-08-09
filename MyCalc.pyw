@@ -7,9 +7,8 @@ import requests
 from bs4 import BeautifulSoup
 
 from PyQt5.QtWidgets import QTableWidgetItem
-
-from PyQt5 import QtCore
 from PyQt5 import QtWidgets
+from PyQt5 import QtCore
 
 from mainwindows import Ui_CalcWin
 
@@ -21,6 +20,7 @@ MONEY: dict = {
     'EUR': 'Euro/кКал',
     'KZT': 'тенге/кКал'}
 MONEY1: dict = {'RUR': 'руб', 'USD': 'USD', 'EUR': 'Euro', 'KZT': 'тенге'}
+FNAME = f'currency_{TODAY}.json'
 
 
 class Record:
@@ -123,12 +123,11 @@ class Calculator(QtWidgets.QMainWindow):
         return self.limit - self.get_today_stats()
 
     def get_rates(self, cur_from, dates, requests):
-        fname = f'currency_{TODAY}.json'
         if cur_from == 'RUR':
             return {'RUR': 1.0}
 
-        if self.open_file(fname):
-            return self.open_file(fname)
+        if self.open_file():
+            return self.open_file()
 
         result = requests.get(
             "https://www.cbr.ru/scripts/XML_daily.asp",
@@ -138,16 +137,16 @@ class Calculator(QtWidgets.QMainWindow):
             float(i.Value.string.replace(',', '.'))
         ) for i in soup('Valute')
         }
-        self.write_file(rates, fname)
-        return self.open_file(fname)
+        self.write_file(rates)
+        return self.open_file()
 
-    def write_file(self, r, fname):
-        with open(fname, 'w', encoding='utf-8') as f:
+    def write_file(self, r):
+        with open(FNAME, 'w', encoding='utf-8') as f:
             return json.dump(r, f, ensure_ascii=False, indent=4)
 
-    def open_file(self, fname):
+    def open_file(self):
         try:
-            with open(fname, 'r', encoding='utf-8') as f:
+            with open(FNAME, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except FileNotFoundError:
             return False
