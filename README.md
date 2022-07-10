@@ -84,7 +84,7 @@ pip install -r requirements.txt
 
 Примеры работы скрипта, добавив в конец секцию:
 
-```bash
+```python
 if __name__ == "__main__":
     limit = 1000
     cash_calculator = CashCalculator(limit)
