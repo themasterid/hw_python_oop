@@ -15,14 +15,14 @@ class Record:
     ) -> None:
         self.amount = amount
         self.comment = comment
-        self.date = (
-            dt.datetime.strptime(date, DATE_FMT).date()
-            if date
-            else dt.datetime.now().date())
+        if date is not None:
+            self.date = dt.datetime.strptime(date, DATE_FMT).date()
+        else:
+            self.date = dt.datetime.now().date()
 
 
 class Calculator:
-    """"Базовый класс калькулятора калорий и денег."""
+    """Базовый класс калькулятора калорий и денег."""
 
     def __init__(self, limit: Union[float, int]):
         self.limit = limit

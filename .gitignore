@@ -1,10 +1,7 @@
 # Byte-compiled / optimized / DLL files
-*.json
-*.bat
 __pycache__/
 *.py[cod]
 *$py.class
-mainwindows.py
 
 # C extensions
 *.so
