@@ -42,6 +42,7 @@ git clone https://github.com/themasterid/hw_python_oop.git
 
 ```bash
 git clone git@github.com:themasterid/hw_python_oop.git
+```
 
 Переходим в папку с проектом:
 
