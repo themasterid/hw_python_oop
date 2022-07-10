@@ -130,6 +130,45 @@ if __name__ == "__main__":
 Сегодня можно съесть что-нибудь ещё, но с общей калорийностью не более 798 кКал
 ```
 
+Для запуска тестов выполним:
+
+```bash
+pytest
+```
+
+Получим:
+
+```bash
+pytest
+======================================= test session starts =======================================
+platform win32 -- Python 3.10.5, pytest-6.2.5, py-1.11.0, pluggy-0.13.1 -- ..\hw_python_oop\venv\Scripts\python.exe
+rootdir: ...\hw_python_oop, configfile: pytest.ini, testpaths: tests/
+collected 20 items
+
+tests/test_homework.py::TestRecord::test_init[kwargs0] PASSED                                [  5%] 
+tests/test_homework.py::TestRecord::test_init[kwargs1] PASSED                                [ 10%]
+tests/test_homework.py::TestCalculator::test_init PASSED                                     [ 15%] 
+tests/test_homework.py::TestCalculator::test_add_record PASSED                               [ 20%] 
+tests/test_homework.py::TestCalculator::test_get_today_stats PASSED                          [ 25%] 
+tests/test_homework.py::TestCalculator::test_get_week_stats PASSED                           [ 30%]
+tests/test_homework.py::TestCalculator::test_get_calories_remained PASSED                    [ 35%] 
+tests/test_homework.py::TestCalculator::test_get_today_cash_remained PASSED                  [ 40%] 
+tests/test_homework.py::TestCaloriesCalculator::test_init PASSED                             [ 45%] 
+tests/test_homework.py::TestCaloriesCalculator::test_get_calories_remained PASSED            [ 50%] 
+tests/test_homework.py::TestCashCalculator::test_init PASSED                                 [ 55%] 
+tests/test_homework.py::TestCashCalculator::test_get_today_cash_remained[0-usd] PASSED       [ 60%] 
+tests/test_homework.py::TestCashCalculator::test_get_today_cash_remained[0-eur] PASSED       [ 65%] 
+tests/test_homework.py::TestCashCalculator::test_get_today_cash_remained[0-rub] PASSED       [ 70%] 
+tests/test_homework.py::TestCashCalculator::test_get_today_cash_remained[1-usd] PASSED       [ 75%] 
+tests/test_homework.py::TestCashCalculator::test_get_today_cash_remained[1-eur] PASSED       [ 80%] 
+tests/test_homework.py::TestCashCalculator::test_get_today_cash_remained[1-rub] PASSED       [ 85%] 
+tests/test_homework.py::TestCashCalculator::test_get_today_cash_remained[-1-usd] PASSED      [ 90%]
+tests/test_homework.py::TestCashCalculator::test_get_today_cash_remained[-1-eur] PASSED      [ 95%] 
+tests/test_homework.py::TestCashCalculator::test_get_today_cash_remained[-1-rub] PASSED      [100%] 
+
+======================================= 20 passed in 0.08s ======================================== 
+```
+
 # Подробнее о формате вывода
 
 Метод get_calories_remained() калькулятора калорий должен возвращать ответы:
