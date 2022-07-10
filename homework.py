@@ -90,3 +90,41 @@ class CashCalculator(Calculator):
         if limit_today > 0:
             return f'На сегодня осталось {cash_today} {name_money}'
         return f'Денег нет, держись: твой долг - {cash_today} {name_money}'
+
+
+if __name__ == "__main__":
+    limit = 1000
+    cash_calculator = CashCalculator(limit)
+    calories_calculator = CaloriesCalculator(limit)
+
+    # записи для денег
+    r1 = Record(amount=145, comment='кофе')
+    r2 = Record(amount=300, comment='Серёге за обед')
+    r3 = Record(
+        amount=3000,
+        comment='Бар на Танин день рождения',
+        date='08.11.2022')
+
+    # записи для калорий
+    r4 = Record(
+        amount=118,
+        comment='Кусок тортика. И ещё один.')
+    r5 = Record(
+        amount=84,
+        comment='Йогурт.')
+    r6 = Record(
+        amount=1140,
+        comment='Баночка чипсов.',
+        date='24.02.2019')
+
+    cash_calculator.add_record(r1)
+    cash_calculator.add_record(r2)
+    cash_calculator.add_record(r3)
+
+    calories_calculator.add_record(r4)
+    calories_calculator.add_record(r5)
+    calories_calculator.add_record(r6)
+
+    # вывод результатов
+    print(cash_calculator.get_today_cash_remained('rub'))
+    print(calories_calculator.get_calories_remained())
