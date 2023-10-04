@@ -5,7 +5,7 @@ DATE_FMT: str = '%d.%m.%Y'
 
 
 class Record:
-    """Класс для хранения значений."""
+    """Класс для хранения записей о расходах или калориях."""
 
     def __init__(
         self,
@@ -13,6 +13,14 @@ class Record:
         comment: str,
         date: Optional[str] = None
     ) -> None:
+        """
+        Инициализация записи.
+
+        :param amount: Сумма (количество потраченных денег или калорий).
+        :param comment: Комментарий к записи.
+        :param date: Дата записи в формате 'дд.мм.гггг' (по умолчанию - текущая дата).
+        """
+
         self.amount = amount
         self.comment = comment
         if date is not None:
@@ -25,26 +33,57 @@ class Calculator:
     """Базовый класс калькулятора калорий и денег."""
 
     def __init__(self, limit: Union[float, int]):
+        """
+        Инициализация калькулятора.
+
+        :param limit: Лимит (бюджет или калорийность) на день.
+        """
+
         self.limit = limit
-        self.records: list = []
+        self.records: list[Record] = []
 
     def add_record(self, record: Record) -> None:
+        """
+        Добавление записи в калькулятор.
+
+        :param record: Запись о расходе или потреблении.
+        """
+
         self.records.append(record)
 
     def get_today_stats(self) -> Union[int, float]:
-        today = dt.date.today()
+        """
+        Получение суммы расходов (или потребленных калорий) за текущий день.
+
+        :return: Сумма расходов за текущий день.
+        """
+
         return sum(
-            day.amount for day in self.records
-            if day.date == today)
+            record.amount for record in self.records
+            if record.date == dt.date.today()
+        )
 
     def get_week_stats(self) -> Union[int, float]:
+        """
+        Получение суммы расходов (или потребленных калорий) за последнюю неделю.
+
+        :return: Сумма расходов за последние 7 дней.
+        """
+
         today = dt.date.today()
-        offset_week = today - dt.timedelta(days=7)
+        week_start = today - dt.timedelta(days=7)
         return sum(
-            day.amount for day in self.records
-            if offset_week <= day.date <= today)
+            record.amount for record in self.records
+            if week_start <= record.date <= today
+        )
 
     def get_limit_today(self) -> Union[int, float]:
+        """
+        Получение остатка лимита (бюджета или калорийности) на текущий день.
+
+        :return: Остаток лимита на текущий день.
+        """
+
         return self.limit - self.get_today_stats()
 
 
@@ -52,24 +91,37 @@ class CaloriesCalculator(Calculator):
     """Дочерний класс калькулятора калорий."""
 
     def get_calories_remained(self) -> str:
-        limit_today = self.get_limit_today()
-        if limit_today > 0:
-            return ('Сегодня можно съесть что-нибудь ещё, но с общей '
-                    f'калорийностью не более {limit_today} кКал')
-        return 'Хватит есть!'
+        """
+        Получение рекомендации по потреблению калорий на текущий день.
+
+        :return: Рекомендация по калориям на текущий день.
+        """
+
+        return (
+            f'Сегодня можно съесть что-нибудь ещё, но с общей калорийностью не более {limit_today} кКал'
+            if (limit_today := self.get_limit_today()) > 0
+            else 'Хватит есть!'
+        )
 
 
 class CashCalculator(Calculator):
     """Дочерний класс калькулятора денег."""
 
-    USD_RATE: float = 72.0
-    EURO_RATE: float = 86.0
+    USD_RATE: float = 92.0
+    EURO_RATE: float = 102.0
     RUB_RATE: float = 1.0
     CALC_ACCURACY: int = 2
 
     def get_today_cash_remained(self, currency: str) -> str:
+        """
+        Получение рекомендации по расходам в день и оставшейся сумме в заданной валюте.
 
-        money: dict = {
+        :param currency: Валюта ('rub', 'usd' или 'eur').
+
+        :return: Рекомендация по расходам и остаток средств в указанной валюте.
+        """
+
+        money: dict[str, tuple[float, str]] = {
             'rub': (self.RUB_RATE, 'руб'),
             'usd': (self.USD_RATE, 'USD'),
             'eur': (self.EURO_RATE, 'Euro')
@@ -83,13 +135,13 @@ class CashCalculator(Calculator):
         if limit_today == 0:
             return 'Денег нет, держись'
 
-        rate_m, name_money = money[currency]
+        rate, currency_name = money[currency]
 
-        cash_today = round(abs(limit_today) / rate_m, self.CALC_ACCURACY)
+        cash_today = round(abs(limit_today) / rate, self.CALC_ACCURACY)
 
         if limit_today > 0:
-            return f'На сегодня осталось {cash_today} {name_money}'
-        return f'Денег нет, держись: твой долг - {cash_today} {name_money}'
+            return f'На сегодня осталось {cash_today} {currency_name}'
+        return f'Денег нет, держись: твой долг - {cash_today} {currency_name}'
 
 
 if __name__ == "__main__":
@@ -100,22 +152,12 @@ if __name__ == "__main__":
     # записи для денег
     r1 = Record(amount=145, comment='кофе')
     r2 = Record(amount=300, comment='Серёге за обед')
-    r3 = Record(
-        amount=3000,
-        comment='Бар на Танин день рождения',
-        date='08.11.2022')
+    r3 = Record(amount=3000, comment='Бар на Танин день рождения', date='08.11.2022')
 
     # записи для калорий
-    r4 = Record(
-        amount=118,
-        comment='Кусок тортика. И ещё один.')
-    r5 = Record(
-        amount=84,
-        comment='Йогурт.')
-    r6 = Record(
-        amount=1140,
-        comment='Баночка чипсов.',
-        date='24.02.2019')
+    r4 = Record(amount=118, comment='Кусок тортика. И ещё один.')
+    r5 = Record(amount=84, comment='Йогурт.')
+    r6 = Record(amount=1140, comment='Баночка чипсов.', date='24.02.2019')
 
     cash_calculator.add_record(r1)
     cash_calculator.add_record(r2)
